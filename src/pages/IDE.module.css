@@ -1,0 +1,6 @@
+.root {
+  display: grid;
+  height: 100%;
+  grid-template-columns: minmax(300px, min-content) 1fr 1fr;
+  grid-template-rows: 1fr;
+}
