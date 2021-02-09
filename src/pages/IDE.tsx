@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { getFileParts, getLanguage } from "../api/fs";
 import { FileSystemTree } from "../components/FileSystemTree";
 import { Preview } from "../components/Preview";
+import { Sidebar } from "../components/Sidebar";
 import { useFileSystem } from "../providers/FileSystemProvider";
 import styles from "./IDE.module.css";
 
@@ -98,11 +99,14 @@ ReactDOM.render(<App />, document.getElementById("root"));
 
   return (
     <main className={styles.root}>
-      <FileSystemTree onOpen={(v) => setActiveFile(v)} />
+      <Sidebar>
+        <FileSystemTree onOpen={(v) => setActiveFile(v)} />
+      </Sidebar>
       {typeof value === "string" ? (
         <MonacoEditor
           onChange={(v) => handleValueChange(v)}
           language={getLanguage(activeFile)}
+          theme="vs-dark"
           value={value}
         />
       ) : (

@@ -1,0 +1,23 @@
+.sidebar {
+  background: var(--sideBar-background);
+  border-right: 1px solid var(--sideBar-border);
+  color: var(--sideBar-foreground);
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+}
+
+.paneBody {
+  flex: 1;
+}
+
+.paneHeader {
+  background-color: var(--sideBarSectionHeader-background);
+  box-sizing: border-box;
+  color: var(--sideBarSectionHeader-foreground);
+  line-height: 22px;
+  margin-inline-start: 4px;
+  /* text-transform: uppercase; */
+}

@@ -1,0 +1,15 @@
+.root li .label {
+  display: flex;
+  flex-direction: row;
+}
+
+.root li .label a {
+  cursor: pointer;
+  flex: 1;
+}
+
+.root ul {
+  list-style: none;
+  margin-block: 0;
+  padding-inline: 0;
+}
