@@ -12,8 +12,10 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  console.debug("SW: fetch", e);
-  e.respondWith(handleFetch(e));
+  if (e.request.url.includes("~/")) {
+    console.debug("SW: fetch", e);
+    e.respondWith(handleFetch(e));
+  }
 });
 
 async function handleFetch(e: FetchEvent): Promise<Response> {

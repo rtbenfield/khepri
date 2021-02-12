@@ -1,9 +1,15 @@
 import MonacoEditor from "@monaco-editor/react";
+import type { Position } from "monaco-editor";
 import React, { useEffect, useState } from "react";
 import { getFileParts, getLanguage } from "../api/fs";
 import { FileSystemTree } from "../components/FileSystemTree";
 import { Preview } from "../components/Preview";
 import { Sidebar } from "../components/Sidebar";
+import {
+  StatusBar,
+  StatusBarItem,
+  StatusBarSpacer,
+} from "../components/StatusBar";
 import { useFileSystem } from "../providers/FileSystemProvider";
 import styles from "./IDE.module.css";
 
@@ -97,6 +103,10 @@ ReactDOM.render(<App />, document.getElementById("root"));
     await fs.write(activeFile, new File([value], name, { type: "text/plain" }));
   }
 
+  const [cursor, setCursor] = useState<Pick<Position, "column" | "lineNumber">>(
+    { column: 0, lineNumber: 0 },
+  );
+
   return (
     <main className={styles.root}>
       <Sidebar>
@@ -106,6 +116,22 @@ ReactDOM.render(<App />, document.getElementById("root"));
         <MonacoEditor
           onChange={(v) => handleValueChange(v)}
           language={getLanguage(activeFile)}
+          beforeMount={(monaco) => {
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+              jsx: monaco.languages.typescript.JsxEmit.Preserve,
+            });
+            monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+              jsx: monaco.languages.typescript.JsxEmit.Preserve,
+            });
+          }}
+          onMount={(editor) => {
+            editor.onDidChangeCursorPosition((e) => {
+              const { column, lineNumber } = e.position;
+              setCursor({ column, lineNumber });
+            });
+          }}
+          keepCurrentModel
+          path={activeFile}
           theme="vs-dark"
           value={value}
         />
@@ -113,6 +139,12 @@ ReactDOM.render(<App />, document.getElementById("root"));
         <div />
       )}
       <Preview />
+      <StatusBar className={styles.statusBar}>
+        <StatusBarSpacer />
+        <StatusBarItem>
+          Ln {cursor.lineNumber}, Col {cursor.column}
+        </StatusBarItem>
+      </StatusBar>
     </main>
   );
 }

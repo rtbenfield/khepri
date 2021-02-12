@@ -2,6 +2,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.0.9",
     "esbuild-wasm": "^0.8.42",
+    "monaco-editor": "^0.22.3",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router": "^5.2.0",
@@ -11,6 +12,7 @@
   "lock": {
     "@monaco-editor/react#^4.0.9": "@monaco-editor/react@v4.0.9-bTiwbQm4HRV0U5LjlzyC",
     "esbuild-wasm#^0.8.42": "esbuild-wasm@v0.8.42-Cwakk2iunkDAjWcwUZr8",
+    "monaco-editor#^0.22.3": "monaco-editor@v0.22.3-1vgFdKNlBUgAWpFa2HHF",
     "react#^17.0.1": "react@v17.0.1-tOtrZxBRexARODgO0jli",
     "react-dom#^17.0.1": "react-dom@v17.0.1-DtIXT56q6U8PbgLMrBhE",
     "react-router#^5.2.0": "react-router@v5.2.0-gtq9bSu1vVZOaV4eppvi",

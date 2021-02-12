@@ -266,6 +266,22 @@ body {
   --widget-shadow: #0000006;
 }
 
+body {
+  background: var(--editor-background);
+}
+
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--scrollbarSlider-hoverBackground);
+}
+
 button {
   align-items: center;
   background: var(--button-background);

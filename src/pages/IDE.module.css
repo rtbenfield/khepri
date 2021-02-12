@@ -1,6 +1,13 @@
 .root {
   display: grid;
   height: 100%;
+  grid-template-areas:
+    "sidebar editor preview"
+    "status-bar status-bar status-bar";
   grid-template-columns: minmax(300px, min-content) 1fr 1fr;
-  grid-template-rows: 1fr;
+  grid-template-rows: 1fr min-content;
+}
+
+.statusBar {
+  grid-area: status-bar;
 }

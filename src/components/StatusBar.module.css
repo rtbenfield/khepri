@@ -1,0 +1,17 @@
+.root {
+  background: var(--statusBar-background);
+  color: var(--statusBar-foreground);
+  display: flex;
+  flex-direction: row;
+  height: 22px;
+  padding-right: 7px;
+}
+
+.item {
+  height: 100%;
+  line-height: 22px;
+}
+
+.spacer {
+  flex: 1;
+}
