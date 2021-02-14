@@ -1,7 +1,7 @@
 import MonacoEditor from "@monaco-editor/react";
 import type { Position } from "monaco-editor";
-import React, { useEffect, useState } from "react";
-import { getFileParts, getLanguage } from "../api/fs";
+import React, { PropsWithChildren, useEffect, useState } from "react";
+import { getLanguage } from "../api/fs";
 import { FileSystemTree } from "../components/FileSystemTree";
 import { Preview } from "../components/Preview";
 import { Sidebar } from "../components/Sidebar";
@@ -12,6 +12,40 @@ import {
 } from "../components/StatusBar";
 import { useFileSystem } from "../providers/FileSystemProvider";
 import styles from "./IDE.module.css";
+
+/**
+ * Blocks rendering of children until dev server is started.
+ */
+function DevServer({ children }: PropsWithChildren<{}>): JSX.Element | null {
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fs = useFileSystem();
+  useEffect(() => {
+    const controller = new AbortController();
+    async function go(signal: AbortSignal): Promise<void> {
+      const cache = await caches.open("khepri");
+      const { startServer } = await import("../api/engine");
+      const esbuild = await import("../api/plugins/esbuild");
+      const devServer = await startServer({
+        cache,
+        fs,
+        plugins: [esbuild.getPlugin],
+      });
+      signal.addEventListener("abort", () => {
+        devServer.shutdown();
+      });
+      setIsLoading(false);
+    }
+    go(controller.signal);
+    return () => controller.abort();
+  }, [fs]);
+
+  if (isLoading) {
+    return null;
+  } else {
+    return <>{children}</>;
+  }
+}
 
 export function IDE(): JSX.Element {
   const [activeFile, setActiveFile] = useState<string>("~/index.html");
@@ -99,8 +133,10 @@ ReactDOM.render(<App />, document.getElementById("root"));
   ): Promise<void> {
     setValue(value);
     // TODO: Debounce this
-    const { name } = getFileParts(activeFile) ?? { name: activeFile };
-    await fs.write(activeFile, new File([value], name, { type: "text/plain" }));
+    await fs.write(
+      activeFile,
+      new File([value], activeFile, { type: "text/plain" }),
+    );
   }
 
   const [cursor, setCursor] = useState<Pick<Position, "column" | "lineNumber">>(
@@ -138,7 +174,9 @@ ReactDOM.render(<App />, document.getElementById("root"));
       ) : (
         <div />
       )}
-      <Preview />
+      <DevServer>
+        <Preview />
+      </DevServer>
       <StatusBar className={styles.statusBar}>
         <StatusBarSpacer />
         <StatusBarItem>

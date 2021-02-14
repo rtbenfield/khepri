@@ -107,7 +107,6 @@ export function FileSystemTree({
   }
 
   const root = buildTree(files);
-  console.debug("File tree", root, files);
   return (
     <Pane className={styles.root}>
       <PaneHeader>Workspace</PaneHeader>

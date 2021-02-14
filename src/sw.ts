@@ -2,24 +2,29 @@
 export {}; // Tells TypeScript to force this into a module
 declare var self: ServiceWorkerGlobalScope;
 
-self.addEventListener("install", (e) => {
-  console.debug("SW: install", e);
+const logger = console;
+
+self.addEventListener("install", () => {
+  logger.debug("[SW] install");
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (e) => {
-  console.debug("SW: activate", e);
+self.addEventListener("activate", () => {
+  logger.debug("[SW] activate");
 });
 
 self.addEventListener("fetch", (e) => {
   if (e.request.url.includes("~/")) {
-    console.debug("SW: fetch", e);
+    logger.debug(`[SW] fetch ${e.request.method} ${e.request.url}`);
     e.respondWith(handleFetch(e));
   }
 });
 
 async function handleFetch(e: FetchEvent): Promise<Response> {
-  const filesystem = await caches.open("filesystem");
-  const match = await filesystem.match(e.request);
+  const filesystem = await caches.open("khepri");
+  const match = await filesystem.match(
+    // TODO: Find a better way to handle this
+    new Request(e.request.url.replace("/dist", "")),
+  );
   return match ?? fetch(e.request);
 }
