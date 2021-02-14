@@ -9,62 +9,73 @@ export type MutableDeep<ObjectType> = {
 };
 
 interface FileSystemTreeProps {
-  onOpen(file: string): void;
+  onOpen(fileHandle: FileSystemFileHandle): void;
 }
 
 interface FileTreeItem {
   readonly children: readonly FileTreeItem[];
-  readonly name: string;
-  readonly path: string;
+  readonly handle: FileSystemHandle;
 }
 
-function buildTree(files: readonly string[]): FileTreeItem {
-  const root: MutableDeep<FileTreeItem> = {
-    children: [],
-    name: "~",
-    path: "~",
-  };
-  for (const file of files) {
-    const parts = file.replace(/^~\//, "").split("/");
-    parts.reduce((prev, part) => {
-      let next = prev.children.find((x) => x.name === part);
-      if (!next) {
-        next = {
-          children: [],
-          name: part,
-          path: `${prev.path}/${part}`,
-        };
-        prev.children.push(next);
-      }
-      return next;
-    }, root);
+async function addFile(
+  root: FileSystemDirectoryHandle,
+  path: string,
+): Promise<void> {
+  const pathParts = path.split("/");
+  const [fileName] = pathParts.slice(-1);
+  const dirNames = pathParts.slice(0, -1);
+  let dirHandle = root;
+  for (const dirName of dirNames) {
+    dirHandle = await dirHandle.getDirectoryHandle(dirName, { create: true });
   }
-  return root;
+  await dirHandle.getFileHandle(fileName, { create: true });
+}
+
+async function buildTree(
+  dir: FileSystemDirectoryHandle,
+): Promise<FileTreeItem> {
+  const dirs: FileTreeItem[] = [];
+  const files: FileTreeItem[] = [];
+  for await (const entry of dir.values()) {
+    switch (entry.kind) {
+      case "directory": {
+        dirs.push(await buildTree(entry));
+        break;
+      }
+      case "file": {
+        files.push({
+          children: [],
+          handle: entry,
+        });
+        break;
+      }
+    }
+  }
+  return {
+    children: [
+      // List directories before files
+      ...dirs,
+      ...files,
+    ],
+    handle: dir,
+  };
 }
 
 export function FileSystemTree({
   onOpen,
 }: FileSystemTreeProps): React.ReactElement {
-  const [files, setFiles] = useState<string[]>([]);
+  const [tree, setTree] = useState<FileTreeItem | null>(null);
   const fs = useFileSystem();
   useEffect(() => {
     async function getFiles(signal: AbortSignal): Promise<void> {
-      const results = await fs.ls();
+      const newTree = await buildTree(fs);
       if (!signal.aborted) {
-        setFiles(results);
+        setTree(newTree);
       }
     }
     const controller = new AbortController();
     getFiles(controller.signal);
     return () => controller.abort();
-  }, [fs]);
-  useEffect(() => {
-    async function handleUpdate(): Promise<void> {
-      const results = await fs.ls();
-      setFiles(results);
-    }
-    fs.addEventListener("update", handleUpdate);
-    return () => fs.removeEventListener("update", handleUpdate);
   }, [fs]);
 
   const [expanded, setExpanded] = useState<string[]>(() =>
@@ -74,44 +85,47 @@ export function FileSystemTree({
     localStorage.setItem("file-system-tree-expanded", JSON.stringify(expanded));
   }, [expanded]);
 
-  async function addFile(): Promise<void> {
+  async function handleAddClick(): Promise<void> {
     const input = prompt("File name:");
     if (input) {
-      const path = `~/${input}`;
-      await fs.write(path, new File([], path, { type: "text/plain" }));
-      onOpen(path);
+      await addFile(fs, input);
+      const newTree = await buildTree(fs);
+      setTree(newTree);
     }
   }
 
-  function renderLayer(node: FileTreeItem): JSX.Element {
+  function renderLayer({ children, handle }: FileTreeItem): JSX.Element {
     return (
-      <React.Fragment key={node.path}>
+      <React.Fragment key={handle.name}>
         <li role="treeitem">
           {/* TODO: This should be a true link */}
           <div className={styles.label}>
             <span
               style={{
-                visibility: node.children.length > 0 ? "visible" : "hidden",
+                visibility: children.length > 0 ? "visible" : "hidden",
               }}
             >
               &#9654;
             </span>
-            <a onClick={() => onOpen(node.path)}>
-              <span>{node.name}</span>
-            </a>
+            {handle.kind === "file" ? (
+              <a onClick={() => onOpen(handle)}>
+                <span>{handle.name}</span>
+              </a>
+            ) : (
+              <span>{handle.name}</span>
+            )}
           </div>
         </li>
-        {node.children.length > 0 && <ul>{node.children.map(renderLayer)}</ul>}
+        {children.length > 0 && <ul>{children.map(renderLayer)}</ul>}
       </React.Fragment>
     );
   }
 
-  const root = buildTree(files);
   return (
     <Pane className={styles.root}>
       <PaneHeader>Workspace</PaneHeader>
-      <ul role="tree">{root.children.map(renderLayer)}</ul>
-      <button onClick={() => addFile()} type="button">
+      {tree && <ul role="tree">{tree.children.map(renderLayer)}</ul>}
+      <button onClick={() => handleAddClick()} type="button">
         Add File
       </button>
     </Pane>

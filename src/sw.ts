@@ -24,7 +24,7 @@ async function handleFetch(e: FetchEvent): Promise<Response> {
   const filesystem = await caches.open("khepri");
   const match = await filesystem.match(
     // TODO: Find a better way to handle this
-    new Request(e.request.url.replace("/dist", "")),
+    new Request(e.request.url.replace("/dist/~", "")),
   );
   return match ?? fetch(e.request);
 }

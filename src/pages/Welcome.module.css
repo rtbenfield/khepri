@@ -1,0 +1,11 @@
+.root {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.root section {
+  background: var(--panel-background);
+  border-radius: 1rem;
+  flex: 1;
+}

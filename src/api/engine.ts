@@ -1,7 +1,5 @@
 // TODO: Many of these types are direct copies of Snowpack types. Maybe Khepri can be Snowpack compatible?
 
-import type { FileSystem } from "./fs";
-
 const logger = console;
 
 /**
@@ -125,21 +123,40 @@ export async function startServer(
     }
   }
 
-  config.fs.addEventListener("update", async (e) => {
-    for (const file of e.files) {
-      switch (file.action) {
-        case "remove":
-          // TODO
-          return;
-        case "write":
-          const f = await e.fs.read(file.path);
-          if (f) {
-            await handleLoad(f);
-          }
-          return;
+  // config.fs.addEventListener("update", async (e) => {
+  //   for (const file of e.files) {
+  //     switch (file.action) {
+  //       case "remove":
+  //         // TODO
+  //         return;
+  //       case "write":
+  //         const f = await e.fs.read(file.path);
+  //         if (f) {
+  //           await handleLoad(f);
+  //         }
+  //         return;
+  //     }
+  //   }
+  // });
+
+  async function buildDirectory(
+    directory: FileSystemDirectoryHandle,
+  ): Promise<void> {
+    for await (const entry of directory.values()) {
+      switch (entry.kind) {
+        case "directory": {
+          await buildDirectory(entry);
+          break;
+        }
+        case "file": {
+          const file = await entry.getFile();
+          await handleLoad(file);
+          break;
+        }
       }
     }
-  });
+  }
+  await buildDirectory(config.fs);
 
   logger.debug(`[KHEPRI] dev server ready`);
 
@@ -160,7 +177,7 @@ export async function startServer(
 
 export interface KhepriConfig {
   cache: Cache;
-  fs: FileSystem;
+  fs: FileSystemDirectoryHandle;
   plugins: KhepriPluginFactory[];
 }
 

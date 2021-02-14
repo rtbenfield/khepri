@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { FileSystem, IDBFileSystem } from "../api/fs";
+import React, { createContext, useContext } from "react";
+import { useWorkspace } from "./WorkspaceProvider";
 
-const context = createContext<FileSystem | undefined>(undefined);
+const context = createContext<FileSystemDirectoryHandle | undefined>(undefined);
 context.displayName = "FileSystemProvider";
 
-export function useFileSystem(): FileSystem {
+export function useFileSystem(): FileSystemDirectoryHandle {
   const value = useContext(context);
   if (!value) {
     throw new Error(
@@ -21,15 +21,12 @@ interface FileSystemProviderProps {
 export function FileSystemProvider({
   children,
 }: FileSystemProviderProps): JSX.Element | null {
-  const [value, setValue] = useState<IDBFileSystem | null>(null);
-
-  useEffect(() => {
-    IDBFileSystem.fromWorkspace({ name: "DEFAULT" }).then((fs) => setValue(fs));
-  }, []);
-
-  if (value) {
-    return <context.Provider value={value}>{children}</context.Provider>;
+  const workspace = useWorkspace();
+  if (workspace) {
+    return (
+      <context.Provider value={workspace.root}>{children}</context.Provider>
+    );
   } else {
-    return null;
+    throw new Error();
   }
 }
