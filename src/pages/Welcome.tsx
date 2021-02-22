@@ -9,6 +9,19 @@ export interface WorkspaceTemplate {
   readonly name: string;
 }
 
+function openFileSystem(): Promise<FileSystemDirectoryHandle> {
+  return window.showDirectoryPicker();
+}
+
+async function openIndexedDB(): Promise<FileSystemDirectoryHandle> {
+  const { createIDBFileSystem } = await import("../api/filesystem/indexeddb");
+  const name = prompt("Workspace name");
+  if (!name) {
+    throw new Error();
+  }
+  return await createIDBFileSystem(name);
+}
+
 async function inflateTemplate(
   directory: FileSystemDirectoryHandle,
   template: WorkspaceTemplate,
@@ -80,7 +93,6 @@ function RecentlyUsed(): JSX.Element {
       );
   }
 }
-React.lazy;
 
 function Templates(): JSX.Element {
   const openWorkspace = useOpenWorkspace();
@@ -89,12 +101,14 @@ function Templates(): JSX.Element {
     factory: () => Promise<{ default: WorkspaceTemplate }>,
   ): Promise<void> {
     try {
-      const handle = await window.showDirectoryPicker();
+      const handle = await openFileSystem();
       const { default: template } = await factory();
       await inflateTemplate(handle, template);
       await settings.addRecent(handle);
       openWorkspace({ root: handle });
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return (
