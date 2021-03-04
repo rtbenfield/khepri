@@ -1,5 +1,6 @@
 import React, { ReactElement, Suspense } from "react";
 import "./App.css";
+import { QuickPickProvider } from "./components/QuickPick";
 import { FileSystemProvider } from "./providers/FileSystemProvider";
 import { useWorkspace, WorkspaceProvider } from "./providers/WorkspaceProvider";
 
@@ -21,11 +22,13 @@ function Router(): JSX.Element {
 
 function App(): ReactElement {
   return (
-    <WorkspaceProvider>
-      <Suspense fallback={null}>
-        <Router />
-      </Suspense>
-    </WorkspaceProvider>
+    <QuickPickProvider>
+      <WorkspaceProvider>
+        <Suspense fallback={null}>
+          <Router />
+        </Suspense>
+      </WorkspaceProvider>
+    </QuickPickProvider>
   );
 }
 

@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import Modal from "react-modal";
+import "web-streams-polyfill";
 import App from "./App";
 import "./index.css";
 
@@ -17,11 +19,18 @@ window.addEventListener("load", async function () {
   }
 });
 
+const root = window.document.getElementById("root");
+if (!root) {
+  throw new Error("Root element not found");
+}
+
+Modal.setAppElement(root);
+
 ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById("root"),
+  root,
 );
 
 // Hot Module Replacement (HMR) - Remove this snippet to remove HMR.

@@ -549,16 +549,16 @@ class IDBFileSystem {
     });
   }
 
-  public async resolve(
+  public resolve(
     root: string,
     path: string,
     type: FileSystemHandleKind,
   ): Promise<string[] | null> {
     switch (type) {
       case "directory":
-        return null;
+        throw new Error("Not implemented.");
       case "file":
-        return null;
+        throw new Error("Not implemented.");
     }
   }
 

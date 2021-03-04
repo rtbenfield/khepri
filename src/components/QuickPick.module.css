@@ -1,0 +1,46 @@
+.overlay {
+  background: none;
+  inset: 0;
+  position: fixed;
+}
+
+.root {
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 8px 2px;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
+  padding-bottom: 6px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 50%;
+}
+
+.root form {
+  margin: 6px 6px 0 6px;
+}
+
+.root ul {
+  list-style: none;
+  margin-top: 6px;
+}
+
+.inputBox {
+  border: 1px solid var(--input-border);
+}
+
+.root li {
+  background: var(--list-inactiveSelectionBackground);
+  color: var(--list-inactiveSelectionForeground);
+}
+
+.root li.focused {
+  background: var(--list-focusBackground);
+  color: var(--list-focusForeground);
+}
+
+.root li.selected {
+  background: var(--list-activeSelectionBackground);
+  color: var(--list-activeSelectionForeground);
+}

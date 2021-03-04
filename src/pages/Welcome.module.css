@@ -1,11 +1,21 @@
 .root {
-  display: flex;
+  align-self: center;
+  display: grid;
   flex-direction: row;
   gap: 1rem;
+  grid-auto-rows: min-content;
+  grid-template-columns: 1fr 1fr;
+  justify-self: center;
+  width: 75%;
+}
+
+.root header {
+  grid-column: 1 / -1;
 }
 
 .root section {
   background: var(--panel-background);
+  border: var(--focusBorder);
   border-radius: 1rem;
   flex: 1;
 }
