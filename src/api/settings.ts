@@ -1,6 +1,6 @@
 async function getDb(): Promise<IDBDatabase> {
   return await new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open("settings", 1);
+    const request = window.indexedDB.open("settings", 1);
     request.addEventListener("error", () => reject(request.error));
     request.addEventListener("success", () => resolve(request.result));
     request.addEventListener("upgradeneeded", () => {
@@ -17,8 +17,8 @@ class Settings {
     const db = await getDb();
     const store = db.transaction("recents", "readwrite").objectStore("recents");
     const requests = directories.map((directory) => {
-      new Promise<void>((resolve, reject) => {
-        const request = store.put(directory);
+      return new Promise<void>((resolve, reject) => {
+        const request = store.add(directory);
         request.addEventListener("error", () => reject(request.error));
         request.addEventListener("success", () => resolve());
       });

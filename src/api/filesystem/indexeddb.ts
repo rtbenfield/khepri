@@ -12,10 +12,7 @@ function validate(name: string): void {
   }
 }
 
-export class IDBFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
-  readonly #fs: IDBFileSystem;
-  readonly #path: string;
-
+abstract class IDBBaseFileSystemHandle {
   public get isDirectory() {
     return true as this["kind"] extends "directory" ? true : false;
   }
@@ -24,12 +21,33 @@ export class IDBFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
     return false as this["kind"] extends "file" ? true : false;
   }
 
+  public abstract get kind(): FileSystemHandleKind;
+
+  public queryPermission(
+    descriptor?: FileSystemHandlePermissionDescriptor,
+  ): Promise<PermissionState> {
+    return Promise.resolve<PermissionState>("granted");
+  }
+
+  public requestPermission(
+    descriptor?: FileSystemHandlePermissionDescriptor,
+  ): Promise<PermissionState> {
+    return Promise.resolve<PermissionState>("granted");
+  }
+}
+
+class IDBFileSystemDirectoryHandle
+  extends IDBBaseFileSystemHandle
+  implements FileSystemDirectoryHandle {
+  readonly #fs: IDBFileSystem;
+  readonly #path: string;
+
   public get kind() {
     return "directory" as const;
   }
 
   public get name() {
-    return getFileName(this.path);
+    return this.path === "/" ? this.#fs.name : getFileName(this.path);
   }
 
   public get path() {
@@ -37,6 +55,7 @@ export class IDBFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
   }
 
   public constructor(path: string, fs: IDBFileSystem) {
+    super();
     this.#fs = fs;
     this.#path = path;
   }
@@ -117,12 +136,6 @@ export class IDBFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
     }
   }
 
-  public queryPermission(
-    descriptor?: FileSystemHandlePermissionDescriptor,
-  ): Promise<PermissionState> {
-    return Promise.resolve("granted");
-  }
-
   public removeEntry(
     name: string,
     options: FileSystemRemoveOptions,
@@ -130,12 +143,6 @@ export class IDBFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
     validate(name);
     const path = combine(this.path, name);
     return this.#fs.removeEntry(path, options);
-  }
-
-  public requestPermission(
-    descriptor?: FileSystemHandlePermissionDescriptor,
-  ): Promise<PermissionState> {
-    return Promise.resolve("granted");
   }
 
   public resolve(
@@ -167,17 +174,11 @@ export class IDBFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
   }
 }
 
-export class IDBFileSystemFileHandle implements FileSystemFileHandle {
+class IDBFileSystemFileHandle
+  extends IDBBaseFileSystemHandle
+  implements FileSystemFileHandle {
   readonly #fs: IDBFileSystem;
   readonly #path: string;
-
-  public get isDirectory() {
-    return false as this["kind"] extends "directory" ? true : false;
-  }
-
-  public get isFile() {
-    return true as this["kind"] extends "file" ? true : false;
-  }
 
   public get kind() {
     return "file" as const;
@@ -192,6 +193,7 @@ export class IDBFileSystemFileHandle implements FileSystemFileHandle {
   }
 
   public constructor(fs: IDBFileSystem, path: string) {
+    super();
     this.#fs = fs;
     this.#path = path;
   }
@@ -214,18 +216,6 @@ export class IDBFileSystemFileHandle implements FileSystemFileHandle {
     } else {
       return Promise.resolve(false);
     }
-  }
-
-  public queryPermission(
-    descriptor?: FileSystemHandlePermissionDescriptor,
-  ): Promise<PermissionState> {
-    return Promise.resolve<PermissionState>("granted");
-  }
-
-  public requestPermission(
-    descriptor?: FileSystemHandlePermissionDescriptor,
-  ): Promise<PermissionState> {
-    return Promise.resolve<PermissionState>("granted");
   }
 }
 
@@ -318,6 +308,10 @@ class IDBFileSystemWritableFileStream
 
 class IDBFileSystem {
   readonly #db: IDBDatabase;
+
+  public get name(): string {
+    return this.#db.name;
+  }
 
   constructor(db: IDBDatabase) {
     this.#db = db;

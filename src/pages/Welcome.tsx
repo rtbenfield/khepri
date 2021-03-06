@@ -1,7 +1,7 @@
 import React from "react";
 import { settings } from "../api/settings";
-import { QuickPickItem, useQuickPick } from "../components/QuickPick";
 import { useAsync } from "../hooks/useAsync";
+import { useFileSystemPicker } from "../hooks/useFileSystemPicker";
 import { useOpenWorkspace } from "../providers/WorkspaceProvider";
 import styles from "./Welcome.module.css";
 
@@ -50,15 +50,15 @@ function RecentlyUsed(): JSX.Element {
         <section>
           <header>
             <h2>Recent</h2>
-            <ul>
-              {recents.data.map((r) => (
-                <li key={r.name} onClick={() => handleClick(r)}>
-                  {r.name}
-                </li>
-              ))}
-            </ul>
-            {recents.data.length === 0 && <p>No recently opened</p>}
           </header>
+          <ul>
+            {recents.data.map((r) => (
+              <li key={r.name} onClick={() => handleClick(r)}>
+                {r.name}
+              </li>
+            ))}
+          </ul>
+          {recents.data.length === 0 && <p>No recently opened</p>}
         </section>
       );
     case "error":
@@ -66,8 +66,8 @@ function RecentlyUsed(): JSX.Element {
         <section>
           <header>
             <h2>Recent</h2>
-            <p>Error</p>
           </header>
+          <p>Error</p>
         </section>
       );
     case "loading":
@@ -75,67 +75,45 @@ function RecentlyUsed(): JSX.Element {
         <section>
           <header>
             <h2>Recently Used</h2>
-            <p>Loading...</p>
           </header>
+          <p>Loading...</p>
         </section>
       );
   }
 }
 
-interface FileSystemQuickPickItem extends QuickPickItem {
-  requestFileSystem(): Promise<FileSystemDirectoryHandle | undefined>;
+function Start(): JSX.Element {
+  const openWorkspace = useOpenWorkspace();
+  const { showFileSystemPicker } = useFileSystemPicker();
+
+  async function handleOpen(): Promise<void> {
+    const handle = await showFileSystemPicker();
+    if (handle) {
+      await settings.addRecent(handle);
+      openWorkspace({ root: handle });
+    }
+  }
+
+  return (
+    <section>
+      <header>
+        <h2>Start</h2>
+      </header>
+      <button onClick={() => handleOpen()} type="button">
+        Open
+      </button>
+    </section>
+  );
 }
 
 function Templates(): JSX.Element {
   const openWorkspace = useOpenWorkspace();
-  const { showInputBox, showQuickPick } = useQuickPick();
-
-  async function handlePickBrowserStorage(): Promise<
-    FileSystemDirectoryHandle | undefined
-  > {
-    const { createIDBFileSystem } = await import("../api/filesystem/indexeddb");
-    const workspaceName = await showInputBox({
-      prompt: "Workspace name",
-    });
-    return workspaceName ? await createIDBFileSystem(workspaceName) : undefined;
-  }
-
-  async function getFileSystem(): Promise<
-    FileSystemDirectoryHandle | undefined
-  > {
-    if ("showDirectoryPicker" in window) {
-      const items: FileSystemQuickPickItem[] = [
-        {
-          alwaysShow: true,
-          key: "FileSystemAccessAPI",
-          label: "Local File System",
-          requestFileSystem() {
-            return window.showDirectoryPicker();
-          },
-        },
-        {
-          alwaysShow: true,
-          key: "IndexedDB",
-          label: "Browser Storage",
-          requestFileSystem() {
-            return handlePickBrowserStorage();
-          },
-        },
-      ];
-      const fs = await showQuickPick(items, {
-        placeHolder: "Select a file system",
-      });
-      return await fs?.requestFileSystem();
-    } else {
-      // Only available option is browser storage
-      return await handlePickBrowserStorage();
-    }
-  }
+  const { showFileSystemPicker } = useFileSystemPicker();
 
   async function handleClick(
     factory: () => Promise<{ default: WorkspaceTemplate }>,
   ): Promise<void> {
-    const handle = await getFileSystem();
+    const handle = await showFileSystemPicker();
     if (handle) {
       try {
         const { default: template } = await factory();
@@ -152,16 +130,16 @@ function Templates(): JSX.Element {
     <section>
       <header>
         <h2>Templates</h2>
-        <ul>
-          <li
-            onClick={() =>
-              handleClick(() => import("../templates/react-typescript"))
-            }
-          >
-            TypeScript React
-          </li>
-        </ul>
       </header>
+      <ul>
+        <li
+          onClick={() =>
+            handleClick(() => import("../templates/react-typescript"))
+          }
+        >
+          TypeScript React
+        </li>
+      </ul>
     </section>
   );
 }
@@ -172,6 +150,7 @@ export default function Welcome(): JSX.Element {
       <header>
         <h1>Khepri Code</h1>
       </header>
+      {/* <Start /> */}
       <RecentlyUsed />
       <Templates />
     </main>
