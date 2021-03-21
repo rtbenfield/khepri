@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "esbuild-wasm": "https://esm.sh/esbuild-wasm/esm/browser.js"
+  }
+}
