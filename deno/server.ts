@@ -1,8 +1,8 @@
 import {
   listenAndServe,
   ServerRequest,
-} from "https://deno.land/std@0.90.0/http/server.ts";
-import { readerFromStreamReader } from "https://deno.land/std@0.90.0/io/mod.ts";
+} from "https://deno.land/std@0.91.0/http/server.ts";
+import { readerFromStreamReader } from "https://deno.land/std@0.91.0/io/mod.ts";
 import { KhepriDevServer } from "../scarab/scarab.ts";
 import { KhepriConfig } from "../scarab/types.ts";
 

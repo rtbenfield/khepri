@@ -67,15 +67,27 @@ async function getConfig(path?: string): Promise<KhepriConfig> {
     return import(importPath).then((x) => x.default);
   } else {
     // Use the default config
-    const fileSystem = await getHandle(Deno.cwd());
-    if (fileSystem.kind !== "directory") {
+    const root = await getHandle(Deno.cwd());
+    if (root.kind !== "directory") {
       throw new Error("... what have you done...");
     }
     const { getPlugin: esbuild } = await import("../plugins/esbuild.ts");
     return {
-      fileSystem,
-      plugins: [esbuild],
       logger: console,
+      mount: [
+        {
+          root: await root.getDirectoryHandle("src", { create: true }),
+          static: false,
+          url: "/src",
+        },
+        {
+          root: await root.getDirectoryHandle("public", { create: true }),
+          static: true,
+          url: "/",
+        },
+      ],
+      plugins: [esbuild],
+      root,
     };
   }
 }

@@ -4,7 +4,7 @@ import {
   join,
   resolve,
   sep,
-} from "https://deno.land/std@0.89.0/path/mod.ts";
+} from "https://deno.land/std@0.91.0/path/mod.ts";
 
 // TODO: This file needs to be audited for spec-compliance and then migrated into its own project outside of Khepri.
 // Right now it is close enough to serve Khepri's needs so I am running with it.

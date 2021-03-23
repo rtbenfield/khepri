@@ -2,9 +2,26 @@
 // TODO: Many of these types are similar to Snowpack types. Maybe Khepri can be Snowpack compatible?
 
 export interface KhepriConfig {
-  fileSystem: FileSystemDirectoryHandle;
   logger?: Console;
-  plugins: KhepriPluginFactory[];
+  /**
+   * Mount points define how URL paths map to file system locations. Only the
+   * first matching mount point is considered, so mount points should be ordered
+   * from most specific to most generic. The remaining URL path after the match
+   * is searched for within the file system.
+   */
+  mount: readonly KhepriMountConfig[];
+  plugins: readonly KhepriPluginFactory[];
+  /**
+   * The file system handle for the root directory of the project. May be used
+   * by plugins and utilities that require scanning the project directory.
+   */
+  root: FileSystemDirectoryHandle;
+}
+
+export interface KhepriMountConfig {
+  root: FileSystemDirectoryHandle;
+  static: boolean;
+  url: string;
 }
 
 export interface KhepriDevServer {
