@@ -1,5 +1,5 @@
 {
   "imports": {
-    "esbuild-wasm": "https://esm.sh/esbuild-wasm/esm/browser.js"
+    "esbuild-wasm": "https://cdn.skypack.dev/esbuild-wasm@0.11.0/esm/browser?dts"
   }
 }

@@ -1,8 +1,10 @@
 import {
+  initialize,
   Loader,
+  transform,
   TransformResult,
-} from "https://cdn.skypack.dev/esbuild-wasm?dts";
-import { initialize, transform } from "esbuild-wasm";
+  version,
+} from "esbuild-wasm";
 import { KhepriConfig, KhepriPlugin } from "../scarab/types.ts";
 
 const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
@@ -12,11 +14,11 @@ const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
 
 export function getPlugin({ logger = console }: KhepriConfig): KhepriPlugin {
   // TODO: Move this into a worker. esbuild-wasm's worker has issues in Deno
+  logger.debug(`[KHEPRI:ESBUILD] initializing esbuild v${version}`);
   const init = initialize({
-    // TODO: This can cause issues if the Deno cache is outdated. It should probably be supplied externally somehow...
-    wasmURL: "https://esm.sh/esbuild-wasm/esbuild.wasm",
+    wasmURL: `https://esm.sh/esbuild-wasm@${version}/esbuild.wasm`,
     worker: false,
-  }).catch((err) => {
+  }).catch((err: unknown) => {
     logger.error(err);
   });
   return {
