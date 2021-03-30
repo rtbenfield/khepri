@@ -21,7 +21,7 @@ Scarab can be used by importing `scarab.ts` and using the provided classes and f
 
 ### Dev Server
 
-Unlikely most build tools, the Scarab dev server does not start a web server. However, it does provide functions for handling standard JavaScript `Request` objects and responding with standard `Response` objects. This aligns with the goals of remaining JavaScript runtime agnostic and relying on web platform standards.
+Unlike most build tools, the Scarab dev server does not start a web server. However, it does provide functions for handling standard JavaScript `Request` objects and responding with standard `Response` objects. This aligns with the goals of remaining JavaScript runtime agnostic and relying on web platform standards.
 
 Wrappers for JavaScript runtimes can start a web server and map their request/response types to the standard types, if needed.
 
@@ -47,7 +47,7 @@ const devServer: KhepriDevServer = await KhepriDevServer.start(config);
 
 ### Build
 
-WIP
+Scarab's `build` behaves more like traditional build tools. It takes all source files configured in `mount` and sends them through the build pipeline. The results are written to the specified `out` directory (defaults to `./build`) based on the mount's URL path and file location.
 
 ## Plugins
 
