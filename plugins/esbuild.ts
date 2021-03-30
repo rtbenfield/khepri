@@ -12,7 +12,7 @@ const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
   unit: "millisecond",
 });
 
-export function getPlugin({ logger = console }: KhepriConfig): KhepriPlugin {
+export function getPlugin({ logger }: KhepriConfig): KhepriPlugin {
   // TODO: Move this into a worker. esbuild-wasm's worker has issues in Deno
   logger.debug(`[KHEPRI:ESBUILD] initializing esbuild v${version}`);
   const init = initialize({
@@ -22,10 +22,15 @@ export function getPlugin({ logger = console }: KhepriConfig): KhepriPlugin {
     logger.error(err);
   });
   return {
+    name: "@khepri/plugin-esbuild",
+    resolve: {
+      input: [".js", ".jsx", ".ts", ".tsx"],
+      output: [".js"],
+    },
     async load({ file }, signal) {
+      await init;
       logger.debug(`[KHEPRI:ESBUILD] compiling ${file.name}`);
       const start = performance.now();
-      await init;
       const input = await file.text();
       throwIfAborterd(signal);
       const result: TransformResult = await transform(input, {
@@ -44,10 +49,6 @@ export function getPlugin({ logger = console }: KhepriConfig): KhepriPlugin {
       return new File([result.code], file.name, {
         type: getContentType(file),
       });
-    },
-    name: "esbuild",
-    resolve: {
-      input: [".js", ".jsx", ".ts", ".tsx"],
     },
   };
 }

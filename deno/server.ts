@@ -3,8 +3,8 @@ import {
   ServerRequest,
 } from "https://deno.land/std@0.91.0/http/server.ts";
 import { readerFromStreamReader } from "https://deno.land/std@0.91.0/io/mod.ts";
-import { KhepriDevServer } from "../scarab/scarab.ts";
-import { KhepriConfig } from "../scarab/types.ts";
+import { KhepriDevServer } from "../scarab/mod.ts";
+import type { KhepriConfig } from "../scarab/mod.ts";
 
 export interface KhepriDevServerOptions {
   config: KhepriConfig;
@@ -58,7 +58,7 @@ export async function startDevServer({
   hostname = "0.0.0.0",
   port = 8080,
 }: KhepriDevServerOptions): Promise<void> {
-  const { logger = console } = config;
+  const { logger } = config;
   logger.info(
     `[KHEPRI:DENO] webserver running. Access it at: http://${hostname}:${port}/`,
   );

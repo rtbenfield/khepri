@@ -21,6 +21,26 @@
       "attachSimplePort": 9229,
       "outputCapture": "std"
     },
+    // Builds Khepri Code with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Build (code)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/code",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../deno/import_map.json",
+        "../deno/cli.ts",
+        "build"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
     // Manually verifies the Khepri Deno `help` command
     {
       "name": "Deno: Help",

@@ -1,10 +1,7 @@
 import { getHandle } from "../deno/file_system_access_api.ts";
 import { getPlugin as esbuild } from "../plugins/esbuild.ts";
 
-const root = await getHandle(Deno.cwd());
-if (root.kind !== "directory") {
-  throw new Error("... what have you done...");
-}
+const root = await getHandle(Deno.cwd(), "directory");
 
 export default {
   logger: console,

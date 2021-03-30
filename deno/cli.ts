@@ -8,11 +8,19 @@ import {
   values,
 } from "https://deno.land/x/args@2.0.8/index.ts";
 import { getHandle } from "./file_system_access_api.ts";
-import { KhepriConfig } from "../scarab/types.ts";
+import { build, DEFAULT_BUILD_DIRECTORY, KhepriConfig } from "../scarab/mod.ts";
 import { startDevServer } from "./server.ts";
 
 const parser = args
   .sub("help", args.describe("Show help"))
+  .sub(
+    "build",
+    args.describe("Build static output")
+      .with(flags.PartialOption("config", {
+        default: undefined,
+        type: values.Text,
+      })),
+  )
   .sub(
     "dev",
     args.describe("Start dev server")
@@ -37,6 +45,19 @@ switch (res.tag) {
     }
     console.log(parser.help());
     Deno.exit(1);
+  }
+  case "build": {
+    const config = await getConfig(res.value.value.config);
+    // TODO: Pull `out` directory from config/arguments
+    const outDirPath = join(Deno.cwd(), DEFAULT_BUILD_DIRECTORY);
+    await Deno.mkdir(outDirPath, { recursive: true });
+    const out = await getHandle(outDirPath, "directory");
+    await build({
+      config,
+      out,
+      isDev: false,
+    });
+    Deno.exit(0);
   }
   case "dev": {
     const config = await getConfig(res.value.value.config);
@@ -67,10 +88,7 @@ async function getConfig(path?: string): Promise<KhepriConfig> {
     return import(importPath).then((x) => x.default);
   } else {
     // Use the default config
-    const root = await getHandle(Deno.cwd());
-    if (root.kind !== "directory") {
-      throw new Error("... what have you done...");
-    }
+    const root = await getHandle(Deno.cwd(), "directory");
     const { getPlugin: esbuild } = await import("../plugins/esbuild.ts");
     return {
       logger: console,

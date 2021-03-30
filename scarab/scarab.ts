@@ -1,10 +1,16 @@
+import { extname } from "https://deno.land/std@0.91.0/path/mod.ts";
 import type {
   KhepriConfig,
   KhepriMountConfig,
   KhepriPlugin,
   PluginRunOptions,
 } from "./types.ts";
-import { extname } from "https://deno.land/std@0.91.0/path/mod.ts";
+import { runPlugin } from "./utils.ts";
+
+const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
+  style: "unit",
+  unit: "millisecond",
+});
 
 // function createResponse(
 //   body: string | void | KhepriBuildMap | null | undefined,
@@ -76,14 +82,14 @@ export class KhepriDevServer {
 
   private constructor(config: KhepriConfig) {
     this.#config = config;
-    this.#logger = config.logger ?? console;
+    this.#logger = config.logger;
     this.#plugins = config.plugins.map((plugin) => plugin(config));
   }
 
   readonly #findLoader = (request: Request): KhepriPlugin | undefined => {
     const extension = extname(request.url);
     return this.#plugins.find((x) =>
-      typeof x.load === "function" && x.resolve?.input.includes(extension)
+      typeof x.load === "function" && x.resolve?.output.includes(extension)
     );
   };
 
@@ -195,54 +201,5 @@ export class KhepriDevServer {
     const devServer = new KhepriDevServer(config);
     devServer.#run();
     return Promise.resolve(devServer);
-  }
-}
-
-export interface BuildOptions {
-  readonly config: KhepriConfig;
-  readonly isDev?: boolean;
-}
-
-/**
- * 
- * @param options 
- * @param signal 
- */
-export async function build(
-  { config, isDev = true }: BuildOptions,
-  signal: AbortSignal = new AbortController().signal,
-): Promise<void> {
-  const logger = config.logger ?? console;
-  const plugins = config.plugins.map((plugin) => plugin(config));
-  await Promise.all(
-    plugins.map((plugin) => runPlugin(plugin, { isDev }, logger, signal)),
-  );
-  throw new Error("Not implemented.");
-}
-
-async function runPlugin(
-  plugin: KhepriPlugin,
-  options: PluginRunOptions,
-  logger: Console,
-  signal: AbortSignal,
-): Promise<void> {
-  if (!plugin.run) {
-    return;
-  }
-
-  logger.debug(
-    `[KHEPRI] plugin ${plugin.name} run starting...`,
-    options,
-  );
-  try {
-    await plugin.run(options, signal);
-    logger.debug(
-      `[KHEPRI] plugin ${plugin.name} run completed`,
-    );
-  } catch (err) {
-    logger.error(
-      `[KHEPRI] plugin ${plugin.name} run: ${err}`,
-      err,
-    );
   }
 }

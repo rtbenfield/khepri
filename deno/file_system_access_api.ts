@@ -333,11 +333,22 @@ class DenoFileWriterSink implements UnderlyingSink<BlobPart> {
   }
 }
 
-export async function getHandle(path: string): Promise<FileSystemHandle> {
+export async function getHandle(
+  path: string,
+  kind: "file",
+): Promise<FileSystemFileHandle>;
+export async function getHandle(
+  path: string,
+  kind: "directory",
+): Promise<FileSystemDirectoryHandle>;
+export async function getHandle(
+  path: string,
+  kind?: FileSystemHandleKind,
+): Promise<FileSystemHandle> {
   const fileInfo = await Deno.stat(path);
-  if (fileInfo.isDirectory) {
+  if (fileInfo.isDirectory && kind !== "file") {
     return new DenoFileSystemDirectoryHandle(path);
-  } else if (fileInfo.isFile) {
+  } else if (fileInfo.isFile && kind !== "directory") {
     return new DenoFileSystemFileHandle(path);
   } else {
     throw new Error(`Invalid FileInfo response`);

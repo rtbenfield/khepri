@@ -1,5 +1,6 @@
 {
   "imports": {
-    "esbuild-wasm": "https://cdn.skypack.dev/esbuild-wasm@0.11.0/esm/browser?dts"
+    "esbuild-wasm": "https://cdn.skypack.dev/esbuild-wasm/esm/browser?dts",
+    "es-module-lexer": "https://cdn.skypack.dev/es-module-lexer?dts"
   }
 }
