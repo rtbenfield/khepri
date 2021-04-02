@@ -12,13 +12,16 @@ const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
   unit: "millisecond",
 });
 
+let init: Promise<void>;
+
 export function getPlugin({ logger }: KhepriConfig): KhepriPlugin {
   // TODO: Move this into a worker. esbuild-wasm's worker has issues in Deno
   logger.debug(`[KHEPRI:ESBUILD] initializing esbuild v${version}`);
-  const init = initialize({
+  init = init ?? initialize({
     wasmURL: `https://unpkg.com/esbuild-wasm@${version}/esbuild.wasm`,
     worker: false,
-  }).catch((err: unknown) => {
+  });
+  init.catch((err: unknown) => {
     logger.error(err);
   });
   return {
