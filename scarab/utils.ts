@@ -1,5 +1,10 @@
 import { KhepriPlugin, PluginRunOptions } from "./types.ts";
 
+export function extname(value: string): string {
+  const filename = value.substring(value.lastIndexOf("/"));
+  return filename.substring(filename.indexOf("."));
+}
+
 export async function runPlugin(
   plugin: KhepriPlugin,
   options: PluginRunOptions,

@@ -1,11 +1,10 @@
-import { extname } from "https://deno.land/std@0.91.0/path/mod.ts";
 import type {
   KhepriConfig,
   KhepriMountConfig,
   KhepriPlugin,
   PluginRunOptions,
 } from "./types.ts";
-import { runPlugin } from "./utils.ts";
+import { extname, runPlugin } from "./utils.ts";
 
 const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
   style: "unit",
@@ -89,7 +88,7 @@ export class KhepriDevServer {
   readonly #findLoader = (request: Request): KhepriPlugin | undefined => {
     const extension = extname(request.url);
     return this.#plugins.find((x) =>
-      typeof x.load === "function" && x.resolve?.output.includes(extension)
+      typeof x.load === "function" && x.resolve?.input.includes(extension)
     );
   };
 

@@ -1,6 +1,5 @@
-import { extname } from "https://deno.land/std@0.91.0/path/mod.ts";
 import type { KhepriConfig, KhepriPlugin, PluginLoadOptions } from "./types.ts";
-import { runPlugin } from "./utils.ts";
+import { extname, runPlugin } from "./utils.ts";
 
 const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
   style: "unit",

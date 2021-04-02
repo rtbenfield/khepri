@@ -170,18 +170,18 @@ declare global {
   }
 
   // Not applicable to Deno
-  // function showOpenFilePicker(
-  //   options?: OpenFilePickerOptions & { multiple?: false },
-  // ): Promise<[FileSystemFileHandle]>;
-  // function showOpenFilePicker(
-  //   options?: OpenFilePickerOptions,
-  // ): Promise<FileSystemFileHandle[]>;
-  // function showSaveFilePicker(
-  //   options?: SaveFilePickerOptions,
-  // ): Promise<FileSystemFileHandle>;
-  // function showDirectoryPicker(
-  //   options?: DirectoryPickerOptions,
-  // ): Promise<FileSystemDirectoryHandle>;
+  function showOpenFilePicker(
+    options?: OpenFilePickerOptions & { multiple?: false },
+  ): Promise<[FileSystemFileHandle]>;
+  function showOpenFilePicker(
+    options?: OpenFilePickerOptions,
+  ): Promise<FileSystemFileHandle[]>;
+  function showSaveFilePicker(
+    options?: SaveFilePickerOptions,
+  ): Promise<FileSystemFileHandle>;
+  function showDirectoryPicker(
+    options?: DirectoryPickerOptions,
+  ): Promise<FileSystemDirectoryHandle>;
 
   // Old methods available on Chromium 85 instead of the ones above.
 

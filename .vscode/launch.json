@@ -21,6 +21,26 @@
       "attachSimplePort": 9229,
       "outputCapture": "std"
     },
+    // Starts Khepri Try with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Dev (try)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/try",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../deno/import_map.json",
+        "../deno/cli.ts",
+        "dev"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
     // Builds Khepri Code with Khepri Deno (still WIP)
     {
       "name": "Deno: Build (code)",
@@ -46,7 +66,6 @@
       "name": "Deno: Help",
       "request": "launch",
       "type": "pwa-node",
-      "program": "./deno/cli.ts",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
@@ -62,5 +81,25 @@
       "attachSimplePort": 9229,
       "outputCapture": "std"
     },
+    // Installs Khepri Deno CLI
+    {
+      "name": "Deno: Install",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "install",
+        "--force",
+        "--unstable",
+        "--allow-all",
+        "--name",
+        "khepri",
+        "--import-map",
+        "./deno/import_map.json",
+        "./deno/cli.ts"
+      ],
+      "outputCapture": "std"
+    }
   ]
 }

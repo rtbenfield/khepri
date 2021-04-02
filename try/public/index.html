@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="importmap">
+      {
+        "imports": {
+          "@khepri/scarab": "/@khepri/scarab/mod.ts",
+          "@khepri/plugins/": "/@khepri/plugins/",
+          "esbuild-wasm": "https://cdn.skypack.dev/esbuild-wasm/esm/browser",
+          "es-module-lexer": "https://cdn.skypack.dev/es-module-lexer",
+          "lit-element": "https://cdn.skypack.dev/lit-element?dts",
+          "lit-html": "https://cdn.skypack.dev/lit-html?dts",
+          "web-streams-polyfill": "https://cdn.skypack.dev/web-streams-polyfill@^3.0.2"
+        }
+      }
+    </script>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Khepri is a browser-based frontend build tool on the web platform."
+    />
+    <title>Khepri | Try</title>
+  </head>
+  <body>
+    <khepri-try></khepri-try>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

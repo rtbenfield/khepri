@@ -16,7 +16,7 @@ export function getPlugin({ logger }: KhepriConfig): KhepriPlugin {
   // TODO: Move this into a worker. esbuild-wasm's worker has issues in Deno
   logger.debug(`[KHEPRI:ESBUILD] initializing esbuild v${version}`);
   const init = initialize({
-    wasmURL: `https://esm.sh/esbuild-wasm@${version}/esbuild.wasm`,
+    wasmURL: `https://unpkg.com/esbuild-wasm@${version}/esbuild.wasm`,
     worker: false,
   }).catch((err: unknown) => {
     logger.error(err);

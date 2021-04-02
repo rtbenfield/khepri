@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@khepri/scarab": "../../scarab/mod.ts",
+    "@khepri/plugins/": "../../plugins/",
+    "esbuild-wasm": "https://cdn.skypack.dev/esbuild-wasm/esm/browser?dts",
+    "es-module-lexer": "https://cdn.skypack.dev/es-module-lexer?dts",
+    "lit-element": "https://cdn.skypack.dev/lit-element?dts",
+    "lit-html": "https://cdn.skypack.dev/lit-html?dts",
+    "web-streams-polyfill": "https://cdn.skypack.dev/web-streams-polyfill@^3.0.2"
+  }
+}
