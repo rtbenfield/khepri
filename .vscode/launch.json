@@ -81,6 +81,26 @@
       "attachSimplePort": 9229,
       "outputCapture": "std"
     },
+    // Starts Khepri Svelte example with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Dev (svelte)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/examples/svelte",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../../deno/import_map.json",
+        "../../deno/cli.ts",
+        "dev"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
     // Installs Khepri Deno CLI
     {
       "name": "Deno: Install",
