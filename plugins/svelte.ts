@@ -1,14 +1,16 @@
 import { compile, VERSION } from "https://cdn.skypack.dev/svelte/compiler";
 import {
   KhepriConfig,
+  KhepriLoadPlugin,
   KhepriPlugin,
+  KhepriPluginResolve,
   PluginLoadOptions,
 } from "../scarab/types.ts";
 
-class SveltePlugin implements KhepriPlugin {
+class SveltePlugin implements KhepriLoadPlugin<[".js", ".css"]> {
   #config: KhepriConfig;
 
-  public get resolve() {
+  public get resolve(): KhepriPluginResolve<[".js", ".css"]> {
     return {
       input: [".svelte"],
       output: [".js", ".css"],
@@ -19,37 +21,17 @@ class SveltePlugin implements KhepriPlugin {
     this.#config = config;
   }
 
-  readonly #fetchFile = async (
-    request: Request,
-    signal: AbortSignal,
-  ): Promise<FileSystemFileHandle | null> => {
-    const mount = this.#config.mount.find((x) => request.url.startsWith(x.url));
-    if (!mount) {
-      return null;
-    }
-    const parts = request.url.replace(mount.url, "").split("/").filter(Boolean);
-    try {
-      let dir = mount.root;
-      for (const part of parts.slice(0, -1)) {
-        dir = await dir.getDirectoryHandle(part, { create: false });
-        throwIfAborterd(signal);
-      }
-      const fileName = parts.slice(-1)[0];
-      const baseName = fileName.replace(/\.css$/, "").replace(/\.js$/, "");
-      return await dir.getFileHandle(`${baseName}.svelte`, { create: false });
-    } catch {
-      return null;
-    }
-  };
-
   public get name() {
     return "@khepri/svelte";
   }
 
-  public async load({
-    file,
-    isDev,
-  }: PluginLoadOptions, signal: AbortSignal): Promise<File> {
+  public async load(
+    {
+      file,
+      isDev,
+    }: PluginLoadOptions,
+    signal: AbortSignal,
+  ): Promise<Record<".js" | ".css", Blob>> {
     const source = await file.text();
     throwIfAborterd(signal);
     const { ast, css, js, stats, vars, warnings } = compile(source, {
@@ -59,33 +41,14 @@ class SveltePlugin implements KhepriPlugin {
       preserveComments: isDev,
       preserveWhitespace: isDev,
     });
-    const baseName = file.name.replace(/\.svelte$/, "");
     for (const warning of warnings) {
       this.#config.logger.warn(warning);
     }
     this.#config.logger.debug(`[KHEPRI:SVELTE] ${file.name} stats`, stats);
-    return new File([js.code], `${baseName}.js`, { type: "text/javascript" });
-    // return new File([css.code], `${baseName}.css`, { type: "text/css" });
-    // return [
-    //   new File([css.code], `${baseName}.css`),
-    //   new File([js.code], `${baseName}.js`),
-    // ];
-  }
-
-  public async handles(
-    request: Request,
-    signal: AbortSignal,
-  ): Promise<File | null> {
-    if (request.url.endsWith(".js") || request.url.endsWith(".css")) {
-      const fileHandle = await this.#fetchFile(request, signal);
-      return fileHandle ? await fileHandle.getFile() : null;
-    } else {
-      return null;
-    }
-  }
-
-  public resolves(file: File, signal: AbortSignal): Promise<boolean> {
-    return Promise.resolve(file.name.endsWith(".svelte"));
+    return {
+      ".css": new Blob([css.code], { type: "text/css" }),
+      ".js": new Blob([js.code], { type: "text/javascript" }),
+    };
   }
 }
 

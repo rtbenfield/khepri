@@ -1,4 +1,10 @@
-import type { KhepriConfig, KhepriPlugin, PluginLoadOptions } from "./types.ts";
+import type {
+  KhepriConfig,
+  KhepriLoadPlugin,
+  KhepriPlugin,
+  KhepriTransformPlugin,
+  PluginLoadOptions,
+} from "./types.ts";
 import { extname, runPlugin } from "./utils.ts";
 
 const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
@@ -83,30 +89,37 @@ async function buildFile(
   signal: AbortSignal,
 ): Promise<void> {
   const extension = extname(source.name);
-  const plugin = plugins.find((x) =>
-    typeof x.load === "function" && x.resolve?.input.includes(extension)
+  const plugin = plugins.find((x): x is KhepriLoadPlugin<string[]> =>
+    "load" in x && x.resolve.input.includes(extension)
   );
   if (plugin) {
     const sourceFile = await source.getFile();
-    let outFile = await plugin.load!({ ...options, file: sourceFile }, signal);
-    for (
-      const transform of plugins.filter((x) =>
-        typeof x.transform === "function" &&
-        x.resolve?.input.includes(extname(outFile.name))
-      )
-    ) {
-      outFile = await transform.transform!({
-        file: outFile,
-        isDev: options.isDev,
-      }, signal);
+    const results = await plugin.load({ ...options, file: sourceFile }, signal);
+    for (const [ext, blob] of Object.entries(results)) {
+      let outFile = new File([blob], sourceFile.name.replace(extension, ext), {
+        type: blob.type,
+      });
+      for (
+        const transform of plugins.filter((
+          x,
+        ): x is KhepriTransformPlugin<string[]> =>
+          "transform" in x &&
+          x.resolve.input.includes(extname(outFile.name))
+        )
+      ) {
+        outFile = await transform.transform({
+          file: outFile,
+          isDev: options.isDev,
+        }, signal);
+      }
+      const newFile = await destination.getFileHandle(source.name, {
+        create: true,
+      });
+      const writer = await newFile.createWritable({
+        keepExistingData: false,
+      });
+      await outFile.stream().pipeTo(writer);
     }
-    const newFile = await destination.getFileHandle(source.name, {
-      create: true,
-    });
-    const writer = await newFile.createWritable({
-      keepExistingData: false,
-    });
-    await outFile.stream().pipeTo(writer);
   }
 }
 

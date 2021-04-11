@@ -11,7 +11,7 @@ export async function runPlugin(
   logger: Console,
   signal: AbortSignal,
 ): Promise<void> {
-  if (!plugin.run) {
+  if (!("run" in plugin)) {
     return;
   }
 

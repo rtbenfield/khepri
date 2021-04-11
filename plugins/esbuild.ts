@@ -5,7 +5,13 @@ import {
   TransformResult,
   version,
 } from "esbuild-wasm";
-import { KhepriConfig, KhepriPlugin } from "../scarab/types.ts";
+import {
+  KhepriConfig,
+  KhepriLoadPlugin,
+  KhepriPlugin,
+  KhepriPluginResolve,
+  PluginLoadOptions,
+} from "../scarab/types.ts";
 
 const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
   style: "unit",
@@ -14,46 +20,63 @@ const msFormatter = new globalThis.Intl.NumberFormat("en-US", {
 
 let init: Promise<void>;
 
-export function getPlugin({ logger }: KhepriConfig): KhepriPlugin {
+class EsbuildPlugin implements KhepriLoadPlugin<[".js"]> {
+  readonly #config: KhepriConfig;
+
+  public constructor(config: KhepriConfig) {
+    this.#config = config;
+  }
+
+  public get name() {
+    return "@khepri/plugin-esbuild";
+  }
+
+  public get resolve(): KhepriPluginResolve<[".js"]> {
+    return {
+      input: [".js", ".jsx", ".ts", ".tsx"],
+      output: [".js"],
+    };
+  }
+
+  public async load(
+    { file }: PluginLoadOptions,
+    signal: AbortSignal,
+  ): Promise<Record<".js", Blob>> {
+    await init;
+    this.#config.logger.debug(`[KHEPRI:ESBUILD] compiling ${file.name}`);
+    const start = performance.now();
+    const input = await file.text();
+    throwIfAborterd(signal);
+    const result: TransformResult = await transform(input, {
+      loader: getLoader(file),
+    });
+    throwIfAborterd(signal);
+    const duration = performance.now() - start;
+    this.#config.logger.debug(
+      `[KHEPRI:ESBUILD] compiled ${file.name} in ${
+        msFormatter.format(duration)
+      }`,
+    );
+    for (const warning of result.warnings) {
+      this.#config.logger.warn(`[KHEPRI:ESBUILD] ${warning.text}`, warning);
+    }
+    return {
+      ".js": new Blob([result.code], { type: getContentType(file) }),
+    };
+  }
+}
+
+export function getPlugin(config: KhepriConfig): EsbuildPlugin {
   // TODO: Move this into a worker. esbuild-wasm's worker has issues in Deno
-  logger.debug(`[KHEPRI:ESBUILD] initializing esbuild v${version}`);
+  config.logger.debug(`[KHEPRI:ESBUILD] initializing esbuild v${version}`);
   init = init ?? initialize({
     wasmURL: `https://unpkg.com/esbuild-wasm@${version}/esbuild.wasm`,
     worker: false,
   });
   init.catch((err: unknown) => {
-    logger.error(err);
+    config.logger.error(err);
   });
-  return {
-    name: "@khepri/plugin-esbuild",
-    resolve: {
-      input: [".js", ".jsx", ".ts", ".tsx"],
-      output: [".js"],
-    },
-    async load({ file }, signal) {
-      await init;
-      logger.debug(`[KHEPRI:ESBUILD] compiling ${file.name}`);
-      const start = performance.now();
-      const input = await file.text();
-      throwIfAborterd(signal);
-      const result: TransformResult = await transform(input, {
-        loader: getLoader(file),
-      });
-      throwIfAborterd(signal);
-      const duration = performance.now() - start;
-      logger.debug(
-        `[KHEPRI:ESBUILD] compiled ${file.name} in ${
-          msFormatter.format(duration)
-        }`,
-      );
-      for (const warning of result.warnings) {
-        logger.warn(`[KHEPRI:ESBUILD] ${warning.text}`, warning);
-      }
-      return new File([result.code], file.name, {
-        type: getContentType(file),
-      });
-    },
-  };
+  return new EsbuildPlugin(config);
 }
 
 function getContentType(file: File): string {

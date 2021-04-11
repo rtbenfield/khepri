@@ -1,5 +1,6 @@
 import type {
   KhepriConfig,
+  KhepriLoadPlugin,
   KhepriMountConfig,
   KhepriPlugin,
   PluginRunOptions,
@@ -85,33 +86,78 @@ export class KhepriDevServer {
     this.#plugins = config.plugins.map((plugin) => plugin(config));
   }
 
-  readonly #findLoader = (request: Request): KhepriPlugin | undefined => {
+  readonly #findLoader = async (
+    request: Request,
+    mount: KhepriMountConfig,
+    signal: AbortSignal,
+  ): Promise<[KhepriLoadPlugin<string[]>, File] | undefined> => {
     const extension = extname(request.url);
-    return this.#plugins.find((x) =>
-      typeof x.load === "function" && x.resolve?.input.includes(extension)
-    );
+    const possibleLoaders = this.#plugins
+      .filter((x): x is KhepriLoadPlugin<string[]> => "load" in x)
+      .filter((x) => x.resolve.output.includes(extension));
+    for (const loader of possibleLoaders) {
+      const source = await this.#getSourceFile(request, mount, loader, signal);
+      if (source) {
+        return [loader, source];
+      }
+    }
   };
 
-  readonly #getFileMount = async (
-    request: Request,
-  ): Promise<[File, KhepriMountConfig] | null> => {
+  readonly #getMount = (request: Request): KhepriMountConfig | undefined => {
     const { pathname } = new URL(request.url);
-    const mount = this.#config.mount.find((x) => pathname.startsWith(x.url));
-    if (mount) {
-      const parts = pathname.replace(mount.url, "").split("/");
-      try {
-        let dir: FileSystemDirectoryHandle = mount.root;
-        for (const dirName of parts.slice(0, -1)) {
-          dir = await dir.getDirectoryHandle(dirName);
-        }
-        const fileHandle = await dir.getFileHandle(parts.slice(-1)[0]);
-        const file = await fileHandle.getFile();
-        return [file, mount];
-      } catch (err) {
-        // TODO: Check for specific error types. Target the file not found
-        return null;
+    return this.#config.mount.find((x) => pathname.startsWith(x.url));
+  };
+
+  readonly #getSourceFile = async (
+    request: Request,
+    mount: KhepriMountConfig,
+    plugin: KhepriLoadPlugin<string[]>,
+    signal: AbortSignal,
+  ): Promise<File | null> => {
+    const { pathname } = new URL(request.url);
+    const parts = pathname.replace(mount.url, "").split("/");
+    try {
+      let dir: FileSystemDirectoryHandle = mount.root;
+      for (const dirName of parts.slice(0, -1)) {
+        dir = await dir.getDirectoryHandle(dirName);
       }
-    } else {
+      const baseName = parts.slice(-1)[0].replace(
+        extname(parts.slice(-1)[0]),
+        "",
+      );
+      for (const possibleExt of plugin.resolve.input) {
+        try {
+          const fileHandle = await dir.getFileHandle(
+            `${baseName}${possibleExt}`,
+          );
+          const file = await fileHandle.getFile();
+          return file;
+        } catch {}
+      }
+      return null;
+    } catch (err) {
+      // TODO: Check for specific error types. Target the file not found
+      return null;
+    }
+  };
+
+  readonly #getStaticFile = async (
+    request: Request,
+    mount: KhepriMountConfig,
+    signal: AbortSignal,
+  ): Promise<File | null> => {
+    const { pathname } = new URL(request.url);
+    const parts = pathname.replace(mount.url, "").split("/");
+    try {
+      let dir: FileSystemDirectoryHandle = mount.root;
+      for (const dirName of parts.slice(0, -1)) {
+        dir = await dir.getDirectoryHandle(dirName);
+      }
+      const fileHandle = await dir.getFileHandle(parts.slice(-1)[0]);
+      const file = await fileHandle.getFile();
+      return file;
+    } catch (err) {
+      // TODO: Check for specific error types. Target the file not found
       return null;
     }
   };
@@ -124,15 +170,26 @@ export class KhepriDevServer {
       return cacheHit.clone();
     }
 
-    const pair = await this.#getFileMount(request);
-    if (!pair) {
+    const mount = this.#getMount(request);
+    if (!mount) {
       return new Response(null, { status: 404 });
-    } else if (pair[1].static) {
-      return new Response(pair[0].stream(), { status: 200 });
+    } else if (mount.static) {
+      const file = await this.#getStaticFile(
+        request,
+        mount,
+        this.#controller.signal,
+      );
+      return file
+        ? new Response(file.stream(), { status: 200 })
+        : new Response(null, { status: 404 });
     } else {
-      const [file] = pair;
-      const loader = this.#findLoader(request);
-      if (loader && typeof loader.load === "function") {
+      const pair = await this.#findLoader(
+        request,
+        mount,
+        this.#controller.signal,
+      );
+      if (pair) {
+        const [loader, file] = pair;
         this.#logger.debug(
           `[KHEPRI] ${request.method} ${request.url} matched ${loader.name}`,
         );
@@ -143,9 +200,10 @@ export class KhepriDevServer {
             isHmrEnabled: false,
             isSSR: false,
           }, this.#controller.signal);
-          const response = new Response(results.stream(), {
+          const blob = results[extname(request.url)];
+          const response = new Response(blob.stream(), {
             headers: {
-              "Content-Type": results.type,
+              "Content-Type": blob.type,
             },
             status: 200,
           });
@@ -161,7 +219,7 @@ export class KhepriDevServer {
       } else {
         // Not a static file, but no loader matched
         this.#logger.warn(
-          `[KHEPRI] ${request.method} ${request.url} did not match a compatible loader plugin`,
+          `[KHEPRI] ${request.method} ${request.url} did not match a compatible loader plugin or source file`,
         );
         return new Response(null, { status: 404 });
       }
