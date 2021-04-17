@@ -1,4 +1,4 @@
-import { join } from "https://deno.land/std@0.91.0/path/mod.ts";
+import { join } from "https://deno.land/std@0.93.0/path/mod.ts";
 import { getHandle } from "../deno/file_system_access_api.ts";
 import { getPlugin as esbuild } from "../plugins/esbuild.ts";
 

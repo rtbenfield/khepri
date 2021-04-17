@@ -2,8 +2,8 @@ import {
   assert,
   assertEquals,
   assertThrowsAsync,
-} from "https://deno.land/std@0.91.0/testing/asserts.ts";
-import { dirname, fromFileUrl } from "https://deno.land/std@0.91.0/path/mod.ts";
+} from "https://deno.land/std@0.93.0/testing/asserts.ts";
+import { dirname, fromFileUrl } from "https://deno.land/std@0.93.0/path/mod.ts";
 import { getHandle } from "./file_system_access_api.ts";
 
 const __filename = fromFileUrl(import.meta.url);

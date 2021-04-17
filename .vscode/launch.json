@@ -10,6 +10,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
+        "--no-check", // Until args initialization error is fixed
         "--unstable",
         "--inspect",
         "--allow-all",
@@ -30,6 +31,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
+        "--no-check", // Until args initialization error is fixed
         "--unstable",
         "--inspect",
         "--allow-all",
@@ -50,6 +52,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
+        "--no-check", // Until args initialization error is fixed
         "--unstable",
         "--inspect",
         "--allow-all",
@@ -70,6 +73,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
+        "--no-check", // Until args initialization error is fixed
         "--unstable",
         "--inspect",
         "--allow-all",
@@ -90,6 +94,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
+        "--no-check", // Until args initialization error is fixed
         "--unstable",
         "--inspect",
         "--allow-all",
@@ -110,6 +115,7 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "install",
+        "--no-check", // Until args initialization error is fixed
         "--force",
         "--unstable",
         "--allow-all",

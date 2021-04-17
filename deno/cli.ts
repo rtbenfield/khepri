@@ -1,12 +1,12 @@
 // deno-lint-ignore-file no-fallthrough
-import { exists } from "https://deno.land/std@0.91.0/fs/mod.ts";
-import { join, toFileUrl } from "https://deno.land/std@0.91.0/path/mod.ts";
+import { exists } from "https://deno.land/std@0.93.0/fs/mod.ts";
+import { join, toFileUrl } from "https://deno.land/std@0.93.0/path/mod.ts";
 import {
   args,
   flags,
   symbols,
   values,
-} from "https://deno.land/x/args@2.0.8/index.ts";
+} from "https://deno.land/x/args@2.1.0/index.ts";
 import { getHandle } from "./file_system_access_api.ts";
 import { build, DEFAULT_BUILD_DIRECTORY, KhepriConfig } from "../scarab/mod.ts";
 import { startDevServer } from "./server.ts";
