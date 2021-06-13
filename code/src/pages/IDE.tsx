@@ -106,33 +106,39 @@ export default function IDE(): JSX.Element {
       <Sidebar>
         <FileSystemTree onOpen={(v) => setActiveFile(v)} />
       </Sidebar>
-      {activeFile && typeof value === "string" ? (
-        <MonacoEditor
-          onChange={(v = "") => setValue(v)}
-          language={getLanguage(activeFile.name)}
-          beforeMount={(monaco) => {
-            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-              jsx: monaco.languages.typescript.JsxEmit.Preserve,
-            });
-            monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-              jsx: monaco.languages.typescript.JsxEmit.Preserve,
-            });
-          }}
-          onMount={(editor) => {
-            editor.onDidChangeCursorPosition((e) => {
-              const { column, lineNumber } = e.position;
-              setCursor({ column, lineNumber });
-            });
-          }}
-          keepCurrentModel
-          // TODO: Reconstruct path from root
-          path={activeFile.name}
-          theme="vs-dark"
-          value={value}
-        />
-      ) : (
-        <div />
-      )}
+      {activeFile && typeof value === "string"
+        ? (
+          <MonacoEditor
+            onChange={(v = "") => setValue(v)}
+            language={getLanguage(activeFile.name)}
+            beforeMount={(monaco) => {
+              monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
+                {
+                  jsx: monaco.languages.typescript.JsxEmit.Preserve,
+                },
+              );
+              monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
+                {
+                  jsx: monaco.languages.typescript.JsxEmit.Preserve,
+                },
+              );
+            }}
+            onMount={(editor) => {
+              editor.onDidChangeCursorPosition((e) => {
+                const { column, lineNumber } = e.position;
+                setCursor({ column, lineNumber });
+              });
+            }}
+            keepCurrentModel
+            // TODO: Reconstruct path from root
+            path={activeFile.name}
+            theme="vs-dark"
+            value={value}
+          />
+        )
+        : (
+          <div />
+        )}
       <DevServer>
         <Preview />
       </DevServer>

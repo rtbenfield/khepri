@@ -8,7 +8,6 @@ import {
 import {
   KhepriConfig,
   KhepriLoadPlugin,
-  KhepriPlugin,
   KhepriPluginResolve,
   PluginLoadOptions,
 } from "../scarab/types.ts";
@@ -23,22 +22,22 @@ let init: Promise<void>;
 class EsbuildPlugin implements KhepriLoadPlugin<[".js"]> {
   readonly #config: KhepriConfig;
 
-  public constructor(config: KhepriConfig) {
+  constructor(config: KhepriConfig) {
     this.#config = config;
   }
 
-  public get name() {
+  get name() {
     return "@khepri/plugin-esbuild";
   }
 
-  public get resolve(): KhepriPluginResolve<[".js"]> {
+  get resolve(): KhepriPluginResolve<[".js"]> {
     return {
       input: [".js", ".jsx", ".ts", ".tsx"],
       output: [".js"],
     };
   }
 
-  public async load(
+  async load(
     { file }: PluginLoadOptions,
     signal: AbortSignal,
   ): Promise<Record<".js", Blob>> {

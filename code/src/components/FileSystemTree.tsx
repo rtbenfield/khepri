@@ -79,7 +79,7 @@ export function FileSystemTree({
   }, [fs]);
 
   const [expanded, setExpanded] = useState<string[]>(() =>
-    JSON.parse(localStorage.getItem("file-system-tree-expanded") ?? "[]"),
+    JSON.parse(localStorage.getItem("file-system-tree-expanded") ?? "[]")
   );
   useEffect(() => {
     localStorage.setItem("file-system-tree-expanded", JSON.stringify(expanded));
@@ -107,13 +107,15 @@ export function FileSystemTree({
             >
               &#9654;
             </span>
-            {handle.kind === "file" ? (
-              <a onClick={() => onOpen(handle)}>
+            {handle.kind === "file"
+              ? (
+                <a onClick={() => onOpen(handle)}>
+                  <span>{handle.name}</span>
+                </a>
+              )
+              : (
                 <span>{handle.name}</span>
-              </a>
-            ) : (
-              <span>{handle.name}</span>
-            )}
+              )}
           </div>
         </li>
         {children.length > 0 && <ul>{children.map(renderLayer)}</ul>}

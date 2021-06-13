@@ -1,4 +1,4 @@
-import { compile, VERSION } from "https://cdn.skypack.dev/svelte/compiler";
+import { compile } from "https://cdn.skypack.dev/svelte/compiler";
 import {
   KhepriConfig,
   KhepriLoadPlugin,
@@ -10,7 +10,7 @@ import {
 class SveltePlugin implements KhepriLoadPlugin<[".js", ".css"]> {
   #config: KhepriConfig;
 
-  public get resolve(): KhepriPluginResolve<[".js", ".css"]> {
+  get resolve(): KhepriPluginResolve<[".js", ".css"]> {
     return {
       input: [".svelte"],
       output: [".js", ".css"],
@@ -21,11 +21,11 @@ class SveltePlugin implements KhepriLoadPlugin<[".js", ".css"]> {
     this.#config = config;
   }
 
-  public get name() {
+  get name() {
     return "@khepri/svelte";
   }
 
-  public async load(
+  async load(
     {
       file,
       isDev,

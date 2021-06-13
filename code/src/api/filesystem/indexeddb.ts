@@ -36,8 +36,7 @@ abstract class IDBBaseFileSystemHandle {
   }
 }
 
-class IDBFileSystemDirectoryHandle
-  extends IDBBaseFileSystemHandle
+class IDBFileSystemDirectoryHandle extends IDBBaseFileSystemHandle
   implements FileSystemDirectoryHandle {
   readonly #fs: IDBFileSystem;
   readonly #path: string;
@@ -174,8 +173,7 @@ class IDBFileSystemDirectoryHandle
   }
 }
 
-class IDBFileSystemFileHandle
-  extends IDBBaseFileSystemHandle
+class IDBFileSystemFileHandle extends IDBBaseFileSystemHandle
   implements FileSystemFileHandle {
   readonly #fs: IDBFileSystem;
   readonly #path: string;
@@ -200,7 +198,9 @@ class IDBFileSystemFileHandle
 
   public createWritable({
     keepExistingData = false,
-  }: FileSystemCreateWritableOptions = {}): Promise<FileSystemWritableFileStream> {
+  }: FileSystemCreateWritableOptions = {}): Promise<
+    FileSystemWritableFileStream
+  > {
     const sink = new IDBFileWriterSink(this.#fs, this.#path, keepExistingData);
     const stream = new IDBFileSystemWritableFileStream(sink);
     return Promise.resolve(stream);
@@ -268,8 +268,7 @@ class IDBFileWriterSink implements UnderlyingSink<BlobPart> {
   }
 }
 
-class IDBFileSystemWritableFileStream
-  extends WritableStream<BlobPart>
+class IDBFileSystemWritableFileStream extends WritableStream<BlobPart>
   implements FileSystemWritableFileStream {
   public seek(position: number): Promise<void> {
     throw new Error("Method not implemented.");

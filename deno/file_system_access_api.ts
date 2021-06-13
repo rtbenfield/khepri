@@ -16,51 +16,51 @@ abstract class DenoBaseFileSystemHandle {
     this.#path = resolve(path);
   }
 
-  public get isDirectory() {
+  get isDirectory() {
     return true as this["kind"] extends "directory" ? true : false;
   }
 
-  public get isFile() {
+  get isFile() {
     return false as this["kind"] extends "file" ? true : false;
   }
 
-  public abstract get kind(): FileSystemHandleKind;
+  abstract get kind(): FileSystemHandleKind;
 
-  public get name(): string {
+  get name(): string {
     return basename(this.#path);
   }
 
-  public get path(): string {
+  get path(): string {
     return this.#path;
   }
 }
 
 class DenoFileSystemDirectoryHandle extends DenoBaseFileSystemHandle
   implements FileSystemDirectoryHandle {
-  public constructor(path: string) {
+  constructor(path: string) {
     super(path);
   }
 
-  public [Symbol.asyncIterator](): AsyncIterableIterator<
+  [Symbol.asyncIterator](): AsyncIterableIterator<
     [string, FileSystemHandle]
   > {
     return this.entries();
   }
 
-  public async *entries(): AsyncIterableIterator<[string, FileSystemHandle]> {
+  async *entries(): AsyncIterableIterator<[string, FileSystemHandle]> {
     for await (const entry of this.values()) {
       yield [entry.name, entry];
     }
   }
 
-  public getDirectory(
+  getDirectory(
     name: string,
     options?: FileSystemGetDirectoryOptions | undefined,
   ): Promise<FileSystemDirectoryHandle> {
     return this.getDirectoryHandle(name, options);
   }
 
-  public async getDirectoryHandle(
+  async getDirectoryHandle(
     name: string,
     { create = false }: FileSystemGetDirectoryOptions = {},
   ): Promise<FileSystemDirectoryHandle> {
@@ -82,18 +82,18 @@ class DenoFileSystemDirectoryHandle extends DenoBaseFileSystemHandle
     }
   }
 
-  public getEntries(): AsyncIterableIterator<FileSystemHandle> {
+  getEntries(): AsyncIterableIterator<FileSystemHandle> {
     return this.values();
   }
 
-  public getFile(
+  getFile(
     name: string,
     options?: FileSystemGetFileOptions | undefined,
   ): Promise<FileSystemFileHandle> {
     return this.getFileHandle(name, options);
   }
 
-  public async getFileHandle(
+  async getFileHandle(
     name: string,
     { create = false }: FileSystemGetFileOptions = {},
   ): Promise<FileSystemFileHandle> {
@@ -116,29 +116,29 @@ class DenoFileSystemDirectoryHandle extends DenoBaseFileSystemHandle
     }
   }
 
-  public isSameEntry(other: FileSystemHandle): Promise<boolean> {
+  isSameEntry(other: FileSystemHandle): Promise<boolean> {
     const isSame = other instanceof DenoFileSystemDirectoryHandle &&
       other.path === this.path;
     return Promise.resolve(isSame);
   }
 
-  public async *keys(): AsyncIterableIterator<string> {
+  async *keys(): AsyncIterableIterator<string> {
     for await (const entry of Deno.readDir(this.path)) {
       yield entry.name;
     }
   }
 
-  public get kind(): "directory" {
+  get kind(): "directory" {
     return "directory";
   }
 
-  public queryPermission(
+  queryPermission(
     descriptor?: FileSystemHandlePermissionDescriptor,
   ): Promise<"denied" | "granted" | "prompt"> {
     return Promise.resolve("granted");
   }
 
-  public async removeEntry(
+  async removeEntry(
     name: string,
     { recursive = false }: FileSystemRemoveOptions = {},
   ): Promise<void> {
@@ -146,13 +146,13 @@ class DenoFileSystemDirectoryHandle extends DenoBaseFileSystemHandle
     await Deno.remove(path, { recursive });
   }
 
-  public requestPermission(
+  requestPermission(
     descriptor?: FileSystemHandlePermissionDescriptor,
   ): Promise<"denied" | "granted" | "prompt"> {
     return Promise.resolve("granted");
   }
 
-  public resolve(
+  resolve(
     possibleDescendant: FileSystemHandle,
   ): Promise<string[] | null> {
     if (
@@ -170,7 +170,7 @@ class DenoFileSystemDirectoryHandle extends DenoBaseFileSystemHandle
     return Promise.resolve(null);
   }
 
-  public async *values(): AsyncIterableIterator<FileSystemHandle> {
+  async *values(): AsyncIterableIterator<FileSystemHandle> {
     for await (const entry of Deno.readDir(this.path)) {
       const path = join(this.path, entry.name);
       if (entry.isDirectory) {
@@ -195,11 +195,11 @@ class DenoFileSystemDirectoryHandle extends DenoBaseFileSystemHandle
 
 class DenoFileSystemFileHandle extends DenoBaseFileSystemHandle
   implements FileSystemFileHandle {
-  public constructor(path: string) {
+  constructor(path: string) {
     super(path);
   }
 
-  public async createWritable(
+  async createWritable(
     { keepExistingData = false }: FileSystemCreateWritableOptions = {},
   ): Promise<FileSystemWritableFileStream> {
     const file = await Deno.open(this.path, {
@@ -211,29 +211,29 @@ class DenoFileSystemFileHandle extends DenoBaseFileSystemHandle
     return new DenoFileSystemWritableFileStream(sink);
   }
 
-  public async getFile(): Promise<File> {
+  async getFile(): Promise<File> {
     const { mtime } = await Deno.stat(this.path);
     const content = await Deno.readFile(this.path);
     return new File([content], this.name, { lastModified: mtime?.getTime() });
   }
 
-  public isSameEntry(other: FileSystemHandle): Promise<boolean> {
+  isSameEntry(other: FileSystemHandle): Promise<boolean> {
     const isSame = other instanceof DenoFileSystemFileHandle &&
       other.path === this.path;
     return Promise.resolve(isSame);
   }
 
-  public get kind(): "file" {
+  get kind(): "file" {
     return "file";
   }
 
-  public queryPermission(
+  queryPermission(
     descriptor?: FileSystemHandlePermissionDescriptor,
   ): Promise<"denied" | "granted" | "prompt"> {
     return Promise.resolve("granted");
   }
 
-  public requestPermission(
+  requestPermission(
     descriptor?: FileSystemHandlePermissionDescriptor,
   ): Promise<"denied" | "granted" | "prompt"> {
     return Promise.resolve("granted");
@@ -244,22 +244,22 @@ class DenoFileSystemWritableFileStream extends WritableStream<BlobPart>
   implements FileSystemWritableFileStream {
   readonly #sink: DenoFileWriterSink;
 
-  public constructor(sink: DenoFileWriterSink) {
+  constructor(sink: DenoFileWriterSink) {
     super(sink);
     this.#sink = sink;
   }
 
-  public async seek(position: number): Promise<void> {
+  async seek(position: number): Promise<void> {
     await this.#sink.file.seek(position, Deno.SeekMode.Start);
   }
 
-  public async truncate(size: number): Promise<void> {
+  async truncate(size: number): Promise<void> {
     await this.seek(0);
     const bytes = new Uint8Array(size);
     await this.#sink.file.write(bytes);
   }
 
-  public async write(data: FileSystemWriteChunkType): Promise<void> {
+  async write(data: FileSystemWriteChunkType): Promise<void> {
     if (
       data instanceof ArrayBuffer ||
       ArrayBuffer.isView(data) ||
@@ -289,23 +289,23 @@ class DenoFileSystemWritableFileStream extends WritableStream<BlobPart>
 class DenoFileWriterSink implements UnderlyingSink<BlobPart> {
   readonly #file: Deno.File;
 
-  public constructor(file: Deno.File) {
+  constructor(file: Deno.File) {
     this.#file = file;
   }
 
-  public abort(reason: unknown): void {
+  abort(reason: unknown): void {
     this.#file.close();
   }
 
-  public close(): void {
+  close(): void {
     this.#file.close();
   }
 
-  public get file(): Deno.File {
+  get file(): Deno.File {
     return this.#file;
   }
 
-  public async write(
+  async write(
     chunk: BlobPart,
     controller: WritableStreamDefaultController,
   ): Promise<void> {

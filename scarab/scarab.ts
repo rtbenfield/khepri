@@ -31,16 +31,16 @@ function getCacheKey(request: Request): string {
 class Cache {
   readonly #cache = new Map<string, Response>();
 
-  public async add(request: Request): Promise<void> {
+  async add(request: Request): Promise<void> {
     const response = await fetch(request);
     this.#cache.set(getCacheKey(request), response.clone());
   }
 
-  public async addAll(requests: readonly Request[]): Promise<void> {
+  async addAll(requests: readonly Request[]): Promise<void> {
     await Promise.all(requests.map((r) => this.add(r)));
   }
 
-  public match(request: Request): Promise<Response | undefined> {
+  match(request: Request): Promise<Response | undefined> {
     // Disable cache until we know when to invalidate
     return Promise.resolve(undefined);
     if (request instanceof Request) {
@@ -50,11 +50,11 @@ class Cache {
     }
   }
 
-  public matchAll(request: Request): Promise<Response[] | undefined> {
+  matchAll(request: Request): Promise<Response[] | undefined> {
     throw new Error("Not implemented.");
   }
 
-  public put(request: Request, response: Response): Promise<void> {
+  put(request: Request, response: Response): Promise<void> {
     this.#cache.set(getCacheKey(request), response);
     return Promise.resolve();
   }
@@ -66,7 +66,7 @@ class Cache {
  * to a port, but remains unopinionated about the web server implementation.
  * Remaining unopinionated allows KhepriDevServer to support multiple
  * JavaScript runtimes through lightweight wrappers.
- * 
+ *
  * KhepriDevServer utilizes standard Request and Response types for
  * interfacing with consumers exposing an HTTP layer. It also utilizes the
  * File System Access API for supplying a file system interface. These
@@ -162,7 +162,7 @@ export class KhepriDevServer {
     }
   };
 
-  public async load(request: Request): Promise<Response> {
+  async load(request: Request): Promise<Response> {
     this.#logger.debug(`[KHEPRI] ${request.method} ${request.url} load`);
     const cacheHit = await this.#cache.match(request);
     if (cacheHit) {
@@ -240,7 +240,7 @@ export class KhepriDevServer {
    * will leak processes and memory.
    * @returns Promise that resolves when the dev server is stopped.
    */
-  public shutdown(): Promise<void> {
+  shutdown(): Promise<void> {
     this.#controller.abort();
     return Promise.resolve();
   }
@@ -252,7 +252,7 @@ export class KhepriDevServer {
    * @param config
    * @returns Promise that resolves when the dev server is started.
    */
-  public static start(
+  static start(
     config: KhepriConfig,
   ): Promise<KhepriDevServer> {
     const devServer = new KhepriDevServer(config);

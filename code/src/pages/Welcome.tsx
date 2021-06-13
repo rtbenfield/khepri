@@ -134,8 +134,7 @@ function Templates(): JSX.Element {
       <ul>
         <li
           onClick={() =>
-            handleClick(() => import("../templates/react-typescript"))
-          }
+            handleClick(() => import("../templates/react-typescript"))}
         >
           TypeScript React
         </li>
