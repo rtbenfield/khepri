@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "deno"
+		},
+		{
+			"path": "plugins"
+		},
+		{
+			"path": "types"
+		},
+		{
+			"path": "scarab"
+		}
+	],
+	"settings": {
+		"deno.enable": true,
+		"deno.importMap": "./import_map.json",
+		"deno.lint": true,
+		"deno.unstable": true
+	}
+}

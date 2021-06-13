@@ -1,0 +1,131 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // Starts Khepri Code with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Dev (code)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/../code",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--no-check", // Until args initialization error is fixed
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../deno/import_map.json",
+        "../deno/cli.ts",
+        "dev"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
+    // Starts Khepri Try with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Dev (try)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/../try",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--no-check", // Until args initialization error is fixed
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../deno/import_map.json",
+        "../deno/cli.ts",
+        "dev"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
+    // Builds Khepri Code with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Build (code)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/../code",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--no-check", // Until args initialization error is fixed
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../deno/import_map.json",
+        "../deno/cli.ts",
+        "build"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
+    // Manually verifies the Khepri Deno `help` command
+    {
+      "name": "Deno: Help",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--no-check", // Until args initialization error is fixed
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "./deno/import_map.json",
+        "./deno/cli.ts",
+        "help"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
+    // Starts Khepri Svelte example with Khepri Deno (still WIP)
+    {
+      "name": "Deno: Dev (svelte)",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}/../examples/svelte",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--no-check", // Until args initialization error is fixed
+        "--unstable",
+        "--inspect",
+        "--allow-all",
+        "--import-map",
+        "../../deno/import_map.json",
+        "../../deno/cli.ts",
+        "dev"
+      ],
+      "attachSimplePort": 9229,
+      "outputCapture": "std"
+    },
+    // Installs Khepri Deno CLI
+    {
+      "name": "Deno: Install",
+      "request": "launch",
+      "type": "pwa-node",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "install",
+        "--no-check", // Until args initialization error is fixed
+        "--force",
+        "--unstable",
+        "--allow-all",
+        "--name",
+        "khepri",
+        "--import-map",
+        "./deno/import_map.json",
+        "./deno/cli.ts"
+      ],
+      "outputCapture": "std"
+    }
+  ]
+}
